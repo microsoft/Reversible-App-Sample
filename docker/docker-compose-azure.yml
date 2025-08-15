@@ -1,0 +1,180 @@
+name: azure
+
+services:
+  # Database
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_DB: customerdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - "5432:5432"
+    volumes:
+      - ../docker/postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - customer-network
+
+  # DAPR Sidecar for API (Azure Service Bus)
+  api-dapr:
+    image: daprio/daprd:latest
+    container_name: api-dapr
+    command: ["./daprd",
+      "-app-id", "api",
+      "-app-port", "8080",
+      "-app-protocol", "http",
+      "-app-channel-address", "api",
+      "-dapr-http-port", "3500",
+      "-dapr-grpc-port", "50001",
+      "-config", "/dapr/config.yaml",
+          "-resources-path", "/dapr/components-azure",
+          "-enable-metrics",
+          "-metrics-port", "9090"]
+    volumes:
+      - ../docker/dapr:/dapr
+    networks:
+      - customer-network
+
+  # DAPR Sidecar for Observer (Azure Service Bus)
+  observer-dapr:
+    image: daprio/daprd:latest
+    container_name: observer-dapr
+    command: ["./daprd",
+      "-app-id", "reversible-customer-observer",
+      "-app-port", "8090",
+      "-app-protocol", "http",
+      "-app-channel-address", "observer",
+      "-dapr-http-port", "3501",
+      "-dapr-grpc-port", "50002",
+      "-config", "/dapr/config.yaml",
+          "-resources-path", "/dapr/components-azure",
+          "-enable-metrics",
+          "-metrics-port", "9091"]
+    volumes:
+      - ../docker/dapr:/dapr
+    networks:
+      - customer-network
+
+  # Customer API (Azure Service Bus)
+  api:
+    build:
+      context: ../java/reversible-api
+      dockerfile: Dockerfile
+    image: api
+    container_name: api
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/customerdb
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres123
+      DAPR_HTTP_PORT: 3500
+      SERVER_PORT: 8080
+      DAPR_GRPC_PORT: 50001
+      # Dapr client configuration - connect to the sidecar container
+      DAPR_HTTP_ENDPOINT: http://api-dapr:3500
+      DAPR_GRPC_ENDPOINT: http://api-dapr:50001
+      DAPR_PUBSUB_NAME: customer-pubsub
+      DAPR_TOPIC_NAME: customer-events
+      ENVIRONMENT: azure
+      SPRING_PROFILES_ACTIVE: prod
+      # OpenTelemetry configuration
+      OTEL_SERVICE_NAME: api
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://aspire-dashboard:18889
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+      OTEL_METRICS_EXPORTER: otlp
+      OTEL_LOGS_EXPORTER: otlp
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
+      MANAGEMENT_OTLP_TRACING_ENDPOINT: http://aspire-dashboard:18889/v1/traces
+      MANAGEMENT_OTLP_METRICS_ENDPOINT: http://aspire-dashboard:18889/v1/metrics
+      OTEL_EXPORTER_OTLP_HEADERS: ""
+    ports:
+      - "8081:8080"
+    command: java -jar app.jar
+    depends_on:
+      - postgres
+      - api-dapr
+    networks:
+      - customer-network
+
+  # Reversible Customer Observer (Azure Service Bus)
+  observer:
+    build:
+      context: ../java/reversible-observer
+      dockerfile: Dockerfile
+    image: observer
+    container_name: observer
+    environment:
+      SERVER_PORT: 8090
+  # Dapr client configuration - connect to the observer sidecar container
+      DAPR_HTTP_ENDPOINT: http://observer-dapr:3501
+      DAPR_GRPC_ENDPOINT: http://observer-dapr:50002
+      DAPR_PUBSUB_NAME: customer-pubsub
+      DAPR_TOPIC_NAME: customer-events
+      ENVIRONMENT: azure
+      SPRING_PROFILES_ACTIVE: prod
+  # Application properties mapping
+      app.dapr.pubsub-name: customer-pubsub
+      app.dapr.topic-name: customer-events
+      # DAPR Java SDK configuration
+      DAPR_API_HOST: observer-dapr
+      DAPR_GRPC_PORT: 50002
+      DAPR_HTTP_PORT: 3501
+  # OpenTelemetry configuration
+      OTEL_SERVICE_NAME: observer
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://aspire-dashboard:18889
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+      OTEL_METRICS_EXPORTER: otlp
+      OTEL_LOGS_EXPORTER: otlp
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
+      MANAGEMENT_OTLP_TRACING_ENDPOINT: http://aspire-dashboard:18889/v1/traces
+      MANAGEMENT_OTLP_METRICS_ENDPOINT: http://aspire-dashboard:18889/v1/metrics
+      OTEL_EXPORTER_OTLP_HEADERS: ""
+    ports:
+      - "8090:8090"
+    command: java -jar app.jar
+    depends_on:
+      - observer-dapr
+    networks:
+      - customer-network
+
+  # Customer Web Application (React)
+  webapp:
+    build:
+      context: ../react/customer-webapp
+      dockerfile: Dockerfile
+      args:
+        # Use environment variables for API URLs
+        REACT_APP_REVERSIBLE_API_URL: http://localhost:8081
+    image: webapp
+    container_name: webapp
+    environment:
+      # Nginx configuration
+      NGINX_HOST: localhost
+      NGINX_PORT: 80
+    ports:
+      - "8083:80"
+    depends_on:
+      - api
+    networks:
+      - customer-network
+
+  # Aspire Dashboard for telemetry and monitoring
+  aspire-dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:latest
+    container_name: otel
+    environment:
+      DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
+      ASPNETCORE_URLS: "http://+:18888"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://aspire-dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+    ports:
+      - "18888:18888"  # Dashboard UI
+      - "18889:18889"  # OTLP gRPC endpoint
+    networks:
+      - customer-network
+
+networks:
+  customer-network:
+    driver: bridge

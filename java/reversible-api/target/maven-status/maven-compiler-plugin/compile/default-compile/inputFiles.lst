@@ -1,0 +1,16 @@
+F:\rev-apps\java\reversible-api\src\main\java\com\revapps\customerapi\exception\GlobalExceptionHandler.java
+F:\rev-apps\java\reversible-api\src\main\java\com\revapps\customerapi\config\DatabaseTracingConfig.java
+F:\rev-apps\java\reversible-api\src\main\java\com\revapps\customerapi\controller\CustomerController.java
+F:\rev-apps\java\reversible-api\src\main\java\com\revapps\customerapi\entity\Customer.java
+F:\rev-apps\java\reversible-api\src\main\java\com\revapps\customerapi\exception\CustomerNotFoundException.java
+F:\rev-apps\java\reversible-api\src\main\java\com\revapps\customerapi\exception\DuplicateEmailException.java
+F:\rev-apps\java\reversible-api\src\main\java\com\revapps\customerapi\repository\CustomerRepository.java
+F:\rev-apps\java\reversible-api\src\main\java\com\revapps\customerapi\dto\CreateCustomerRequest.java
+F:\rev-apps\java\reversible-api\src\main\java\com\revapps\customerapi\dto\CustomerResponse.java
+F:\rev-apps\java\reversible-api\src\main\java\com\revapps\customerapi\service\CustomerService.java
+F:\rev-apps\java\reversible-api\src\main\java\com\revapps\customerapi\ReversibleCustomerApiApplication.java
+F:\rev-apps\java\reversible-api\src\main\java\com\revapps\customerapi\config\DaprConfig.java
+F:\rev-apps\java\reversible-api\src\main\java\com\revapps\customerapi\config\TelemetryConfig.java
+F:\rev-apps\java\reversible-api\src\main\java\com\revapps\customerapi\dto\CustomerEvent.java
+F:\rev-apps\java\reversible-api\src\main\java\com\revapps\customerapi\dto\UpdateCustomerRequest.java
+F:\rev-apps\java\reversible-api\src\main\java\com\revapps\customerapi\service\DaprCustomerEventPublisher.java

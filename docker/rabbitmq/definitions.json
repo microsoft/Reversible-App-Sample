@@ -1,0 +1,69 @@
+{
+  "rabbit_version": "4.1.3",
+  "rabbitmq_version": "4.1.3",
+  "product_name": "RabbitMQ",
+  "product_version": "4.1.3",
+  "users": [
+    {
+      "name": "admin",
+      "password": "admin123",
+      "tags": "administrator"
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "/"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "admin",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "topic_permissions": [],
+  "parameters": [],
+  "global_parameters": [
+    {
+      "name": "cluster_name",
+      "value": "rabbit@rabbitmq-dev"
+    }
+  ],
+  "policies": [],
+  "queues": [
+    {
+  "name": "customer-pubsub-customer-events",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-max-length": 1000,
+        "x-max-length-bytes": 1048576
+      }
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "customer-events",
+      "vhost": "/",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "customer-events",
+      "vhost": "/",
+  "destination": "customer-pubsub-customer-events",
+      "destination_type": "queue",
+      "routing_key": "customer.*",
+      "arguments": {}
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Maven wrapper - Linux/Mac version
+exec ./mvnw
