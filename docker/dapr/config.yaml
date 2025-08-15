@@ -1,0 +1,16 @@
+apiVersion: dapr.io/v1alpha1
+kind: Configuration
+metadata:
+  name: customer-config
+spec:
+  tracing:
+    samplingRate: "1"
+    otel:
+      endpointAddress: "aspire-dashboard:18889"
+      isSecure: false
+      protocol: "grpc"
+  metric:
+    enabled: true
+  features:
+    - name: pubsub.messageRouting
+      enabled: true

@@ -1,0 +1,54 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: customer-pubsub
+spec:
+  type: pubsub.rabbitmq
+  version: v1
+  metadata:
+  # Connection settings
+  - name: connectionString
+    value: "amqp://admin:admin123@rabbitmq:5672"
+  - name: protocol
+    value: "amqp"
+  - name: hostname
+    value: "rabbitmq"
+  - name: username
+    value: "admin"
+  - name: password
+    value: "admin123"
+  - name: port
+    value: "5672"
+  # Exchange configuration - use the exchange DAPR creates by default
+  - name: exchangeName
+    value: "customer-events"
+  - name: exchangeKind
+    value: "topic"
+  - name: publisherConfirm
+    value: "true"
+  # Queue and Exchange settings
+  - name: durable
+    value: "true"
+  - name: deletedWhenUnused
+    value: "false"
+  - name: autoAck
+    value: "false"
+  - name: deliveryMode
+    value: "2"
+  - name: requeueInFailure
+    value: "true"
+  # Consumer settings
+  - name: prefetchCount
+    value: "10"
+  - name: reconnectWait
+    value: "5"
+  - name: concurrency
+    value: "parallel"
+  # Queue limits
+  - name: maxLen
+    value: "1000"
+  - name: maxLenBytes
+    value: "1048576"
+  # Consumer queue naming: <consumerID>-<topic>
+  - name: consumerID
+    value: "customer-pubsub"

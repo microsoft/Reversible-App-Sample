@@ -1,0 +1,16 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: customer-pubsub
+spec:
+  type: pubsub.azure.servicebus.topics
+  version: v1
+  metadata:
+  - name: connectionString
+    secretKeyRef:
+      name: servicebus-connection-string
+      key: servicebus-connection-string
+  - name: consumerID
+    value: "customer-pubsub"
+auth:
+  secretStore: local-secret-store

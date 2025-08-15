@@ -1,0 +1,17 @@
+com\revapps\customerapi\exception\DuplicateEmailException.class
+com\revapps\customerapi\exception\GlobalExceptionHandler.class
+com\revapps\customerapi\exception\GlobalExceptionHandler$ErrorResponse.class
+com\revapps\customerapi\service\DaprCustomerEventPublisher.class
+com\revapps\customerapi\dto\CustomerResponse.class
+com\revapps\customerapi\config\TelemetryConfig.class
+com\revapps\customerapi\exception\CustomerNotFoundException.class
+com\revapps\customerapi\service\CustomerService.class
+com\revapps\customerapi\dto\CustomerEvent.class
+com\revapps\customerapi\config\DaprConfig.class
+com\revapps\customerapi\entity\Customer.class
+com\revapps\customerapi\controller\CustomerController.class
+com\revapps\customerapi\dto\CreateCustomerRequest.class
+com\revapps\customerapi\ReversibleCustomerApiApplication.class
+com\revapps\customerapi\config\DatabaseTracingConfig.class
+com\revapps\customerapi\repository\CustomerRepository.class
+com\revapps\customerapi\dto\UpdateCustomerRequest.class
